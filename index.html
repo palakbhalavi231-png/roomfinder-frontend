@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RoomFinder Maharashtra - Zero Brokerage Room & Flat Finder</title>
+  <meta name="description" content="Find verified rooms, 1RK, 1BHK, 2BHK flats, and student PGs across Ramtek, Nagpur, Pune, Mumbai with 0% brokerage. Direct owner contact." />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Font Awesome Icons for clean, student-friendly native UI -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+
+  <!-- ========================================================================= -->
+  <!-- 1. TOP DEMO / ROLE BAR (Student Viva & Testing Controls)                 -->
+  <!-- ========================================================================= -->
+  <div class="top-demo-bar">
+    <div class="demo-bar-inner">
+      <div class="demo-left">
+        <span class="pulse-dot"></span>
+        <span class="demo-badge">VIVA / DEMO MODE</span>
+        <span class="demo-role-text">Active Role: <strong id="currentRoleText">Tenant (Student)</strong></span>
+      </div>
+      <div class="demo-right">
+        <span class="switch-label">Switch Role:</span>
+        <button class="role-btn active" onclick="switchRole('tenant')"><i class="fa-solid fa-user-graduate"></i> Tenant</button>
+        <button class="role-btn" onclick="switchRole('landlord')"><i class="fa-solid fa-house-chimney-user"></i> Landlord</button>
+        <button class="role-btn" onclick="switchRole('admin')"><i class="fa-solid fa-shield-halved"></i> Admin</button>
+        <a href="roomfinder_vanilla_html_css_js.zip" download="roomfinder_vanilla_html_css_js.zip" class="download-zip-btn" title="Download the 3 files (HTML, CSS, JS) in a ZIP">
+          <i class="fa-solid fa-download"></i> Download ZIP
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 2. MAIN HEADER & NAVBAR                                                   -->
+  <!-- ========================================================================= -->
+  <header class="main-header">
+    <div class="header-inner">
+      <!-- Brand Logo -->
+      <div class="brand" onclick="navigateTo('home')">
+        <div class="brand-icon">
+          <i class="fa-solid fa-building"></i>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title">RoomFinder <span class="state-tag">Maharashtra</span></div>
+          <div class="brand-subtitle"><i class="fa-solid fa-circle-check"></i> 100% ZERO BROKERAGE DIRECT RENTALS</div>
+        </div>
+      </div>
+
+      <!-- Nav Links -->
+      <nav class="nav-links">
+        <a href="#properties-section" onclick="filterByCity('')" class="nav-item"><i class="fa-solid fa-magnifying-glass"></i> Browse Rooms</a>
+        <a href="#properties-section" onclick="filterByCity('Ramtek, Dist. Nagpur')" class="nav-item highlight-city"><i class="fa-solid fa-location-dot"></i> Ramtek (Nagpur)</a>
+        <a href="#calculator-section" class="nav-item"><i class="fa-solid fa-calculator"></i> Zero Brokerage Calc</a>
+        <button class="nav-item btn-link" onclick="openAddPropertyModal()"><i class="fa-solid fa-plus-circle"></i> Post Free Property</button>
+        <button class="nav-item btn-link" onclick="openFavoritesModal()"><i class="fa-solid fa-heart"></i> Saved (<span id="favCount">0</span>)</button>
+        <button class="nav-item btn-link admin-nav-btn" id="adminNavBtn" style="display:none;" onclick="openAdminModal()"><i class="fa-solid fa-shield-halved"></i> Admin Panel</button>
+      </nav>
+
+      <!-- User CTA Button -->
+      <div class="nav-actions">
+        <button class="btn-primary" onclick="openAddPropertyModal()">
+          <i class="fa-solid fa-house-medical"></i> List Your Room Free
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- 3. HERO SECTION WITH SEARCH FILTERS                                       -->
+  <!-- ========================================================================= -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-pill">
+        <i class="fa-solid fa-bolt"></i> Direct Owner Network • No Broker Commission
+      </div>
+      <h1 class="hero-title">
+        Find your next verified room in <span class="highlight-mh">Maharashtra</span>
+      </h1>
+      <p class="hero-desc">
+        Connect directly with genuine property owners across <strong>Ramtek (dist. Nagpur)</strong>, 
+        <strong>Nagpur</strong>, <strong>Pune</strong>, <strong>Mumbai</strong>, and beyond. Budget capped strictly at 
+        <strong>₹2,000 – ₹10,000/month</strong> for students and working bachelors.
+      </p>
+
+      <!-- Search Box Card -->
+      <div class="search-card">
+        <div class="search-field">
+          <label><i class="fa-solid fa-location-dot"></i> Select City</label>
+          <select id="searchCity" onchange="applyFilters()">
+            <option value="">All Maharashtra</option>
+            <option value="Ramtek, Dist. Nagpur">Ramtek (Near KITS College, Nagpur)</option>
+            <option value="Nagpur">Nagpur</option>
+            <option value="Pune">Pune</option>
+            <option value="Mumbai">Mumbai</option>
+            <option value="Nashik">Nashik</option>
+            <option value="Chhatrapati Sambhaji Nagar">Chhatrapati Sambhaji Nagar</option>
+            <option value="Thane">Thane</option>
+            <option value="Navi Mumbai">Navi Mumbai</option>
+          </select>
+        </div>
+
+        <div class="search-field">
+          <label><i class="fa-solid fa-indian-rupee-sign"></i> Max Budget (₹2k - ₹10k)</label>
+          <input type="number" id="searchMaxRent" min="2000" max="10000" placeholder="e.g. 7000" oninput="applyFilters()" />
+        </div>
+
+        <div class="search-field">
+          <label><i class="fa-solid fa-door-open"></i> Room Type</label>
+          <select id="searchType" onchange="applyFilters()">
+            <option value="">Any Room Type</option>
+            <option value="1RK">1 RK Studio Room</option>
+            <option value="1BHK">1 BHK Flat</option>
+            <option value="2BHK">2 BHK Apartment</option>
+            <option value="PG">Student / Working PG</option>
+            <option value="Room">Single Shared Room</option>
+          </select>
+        </div>
+
+        <div class="search-field btn-field">
+          <button class="search-submit-btn" onclick="applyFilters()">
+            <i class="fa-solid fa-magnifying-glass"></i> Find Rooms
+          </button>
+        </div>
+      </div>
+
+      <!-- Popular City Quick Tags -->
+      <div class="quick-cities">
+        <span class="quick-label">Popular Locations:</span>
+        <button class="city-pill" onclick="filterByCity('Ramtek, Dist. Nagpur')">Ramtek (KITS Campus)</button>
+        <button class="city-pill" onclick="filterByCity('Nagpur')">Nagpur</button>
+        <button class="city-pill" onclick="filterByCity('Pune')">Pune</button>
+        <button class="city-pill" onclick="filterByCity('Mumbai')">Mumbai</button>
+        <button class="city-pill" onclick="filterByCity('')">Reset All</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 4. ZERO BROKERAGE SAVINGS CALCULATOR                                      -->
+  <!-- ========================================================================= -->
+  <section class="calculator-section" id="calculator-section">
+    <div class="section-container">
+      <div class="calc-box">
+        <div class="calc-left">
+          <div class="calc-tag"><i class="fa-solid fa-hand-holding-dollar"></i> SAVINGS ESTIMATOR</div>
+          <h2>Zero Brokerage Guarantee</h2>
+          <p>
+            Brokers typically charge <strong>1 to 2 months' rent</strong> plus GST just to show rooms. 
+            On RoomFinder Maharashtra, you connect with property owners directly at <strong>₹0 brokerage</strong>.
+          </p>
+          <div class="slider-wrapper">
+            <div class="slider-header">
+              <span>Expected Monthly Rent:</span>
+              <strong id="sliderRentVal">₹ 6,000 / mo</strong>
+            </div>
+            <input type="range" id="rentSlider" min="2000" max="10000" step="500" value="6000" oninput="updateCalculator(this.value)" />
+            <div class="slider-limits">
+              <span>₹2,000 (Min Student Cap)</span>
+              <span>₹10,000 (Max Student Cap)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="calc-right">
+          <div class="comparison-card">
+            <div class="compare-row old-broker">
+              <span>Traditional Broker Fee:</span>
+              <strong id="traditionalFee">₹ 6,000</strong>
+            </div>
+            <div class="compare-row roomfinder-fee">
+              <span>RoomFinder Brokerage:</span>
+              <strong class="free-text">₹ 0 (100% FREE)</strong>
+            </div>
+            <div class="savings-total">
+              <span class="savings-label">Direct Money You Save:</span>
+              <span class="savings-amount" id="savingsAmount">₹ 6,000</span>
+              <span class="savings-note">Money saved stays in your student pocket!</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 5. FEATURED / VERIFIED ROOMS LISTING SECTION                              -->
+  <!-- ========================================================================= -->
+  <section class="properties-section" id="properties-section">
+    <div class="section-container">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Verified Budget Accommodations</h2>
+          <p class="section-subtitle">Owner-listed rooms & flats strictly between ₹2,000 to ₹10,000/mo</p>
+        </div>
+        <div class="filter-tabs">
+          <button class="tab-btn active" onclick="setQuickTab('all', this)">All</button>
+          <button class="tab-btn" onclick="setQuickTab('ramtek', this)">Ramtek (Near KITS)</button>
+          <button class="tab-btn" onclick="setQuickTab('under5k', this)">Under ₹5,000</button>
+          <button class="tab-btn" onclick="setQuickTab('pg', this)">Student PGs</button>
+        </div>
+      </div>
+
+      <!-- Properties Grid -->
+      <div class="property-grid" id="propertyGrid">
+        <!-- Injected dynamically via script.js -->
+      </div>
+
+      <!-- No Results State -->
+      <div id="noResults" class="no-results" style="display:none;">
+        <i class="fa-solid fa-magnifying-glass-location"></i>
+        <h3>No matching rooms found</h3>
+        <p>Try resetting the city or increasing the budget filter up to ₹10,000.</p>
+        <button class="btn-secondary" onclick="resetAllFilters()">Reset Filters</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 6. RAMTEK & MAHARASHTRA SPECIAL SPOTLIGHT                                 -->
+  <!-- ========================================================================= -->
+  <section class="spotlight-section">
+    <div class="section-container">
+      <div class="spotlight-card">
+        <div class="spotlight-icon">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div class="spotlight-text">
+          <h3>Special Focus: Ramtek & Nagpur Educational Belt</h3>
+          <p>
+            Are you a student of <strong>K.I.T.S Engineering College Ramtek</strong> or universities in Nagpur? 
+            We have pre-verified rooms on KITS College Road, Mansar Road, and Ramtek Station area with 
+            sweet borewell water, 24x7 study electricity, and zero brokerage.
+          </p>
+        </div>
+        <button class="spotlight-btn" onclick="filterByCity('Ramtek, Dist. Nagpur')">
+          View Ramtek Rooms <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 7. MODALS (Popups for Schedule Visit, Post Property, Chat, Details)       -->
+  <!-- ========================================================================= -->
+
+  <!-- Modal 1: Schedule Visit Modal -->
+  <div class="modal-overlay" id="visitModal" style="display: none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-calendar-check"></i> Schedule Free Room Visit</h3>
+        <button class="modal-close" onclick="closeModal('visitModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-prop-title" id="visitPropTitle">Spacious 2BHK Flat near KITS</p>
+        <p class="modal-prop-address" id="visitPropAddress">KITS College Road, Ramtek</p>
+
+        <form id="visitForm" onsubmit="handleScheduleVisitSubmit(event)">
+          <div class="form-group">
+            <label>Your Full Name *</label>
+            <input type="text" id="visitTenantName" required placeholder="Enter student / tenant name" />
+          </div>
+          <div class="form-group">
+            <label>Contact Phone Number *</label>
+            <input type="tel" id="visitTenantPhone" required placeholder="e.g. 9876543210" pattern="[0-9]{10}" title="Please enter 10 digits" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Visit Date *</label>
+              <input type="date" id="visitDate" required />
+            </div>
+            <div class="form-group">
+              <label>Preferred Time Slot *</label>
+              <select id="visitTimeSlot" required>
+                <option value="Morning (10:00 AM - 12:00 PM)">Morning (10 AM - 12 PM)</option>
+                <option value="Afternoon (01:00 PM - 03:00 PM)">Afternoon (1 PM - 3 PM)</option>
+                <option value="Evening (04:00 PM - 07:00 PM)">Evening (4 PM - 7 PM)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Notes / Questions for Landlord</label>
+            <textarea id="visitNotes" rows="2" placeholder="e.g., Interested for 2 college friends, need 24hr water"></textarea>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" onclick="closeModal('visitModal')">Cancel</button>
+            <button type="submit" class="btn-primary"><i class="fa-solid fa-check"></i> Confirm Visit Booking</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Post Free Property Modal (Landlord) -->
+  <div class="modal-overlay" id="addPropertyModal" style="display: none;">
+    <div class="modal-box modal-wide">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-house-chimney-medical"></i> Post Room or Flat (100% Free)</h3>
+        <button class="modal-close" onclick="closeModal('addPropertyModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="addPropertyForm" onsubmit="handleAddPropertySubmit(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Property Title *</label>
+              <input type="text" id="newTitle" required placeholder="e.g. Clean 1BHK with Balcony near College" />
+            </div>
+            <div class="form-group">
+              <label>City in Maharashtra *</label>
+              <select id="newCity" required>
+                <option value="Ramtek, Dist. Nagpur">Ramtek, Dist. Nagpur</option>
+                <option value="Nagpur">Nagpur</option>
+                <option value="Pune">Pune</option>
+                <option value="Mumbai">Mumbai</option>
+                <option value="Nashik">Nashik</option>
+                <option value="Chhatrapati Sambhaji Nagar">Chhatrapati Sambhaji Nagar</option>
+                <option value="Thane">Thane</option>
+                <option value="Navi Mumbai">Navi Mumbai</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Locality / Landmark *</label>
+              <input type="text" id="newLocality" required placeholder="e.g. KITS College Road or Sitabuldi" />
+            </div>
+            <div class="form-group">
+              <label>Room Type *</label>
+              <select id="newType" required>
+                <option value="1RK">1 RK</option>
+                <option value="1BHK">1 BHK</option>
+                <option value="2BHK">2 BHK</option>
+                <option value="PG">Student / Working PG</option>
+                <option value="Room">Shared Room</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Monthly Rent (₹2,000 - ₹10,000) *</label>
+              <input type="number" id="newRent" min="2000" max="10000" required placeholder="e.g. 5500" />
+            </div>
+            <div class="form-group">
+              <label>Security Deposit (₹) *</label>
+              <input type="number" id="newDeposit" required placeholder="e.g. 10000" />
+            </div>
+            <div class="form-group">
+              <label>Furnishing *</label>
+              <select id="newFurnishing" required>
+                <option value="Semi-Furnished">Semi-Furnished</option>
+                <option value="Fully Furnished">Fully Furnished</option>
+                <option value="Unfurnished">Unfurnished</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Owner Name *</label>
+              <input type="text" id="newLandlordName" required placeholder="e.g. Anil Deshmukh" />
+            </div>
+            <div class="form-group">
+              <label>Owner Contact Phone *</label>
+              <input type="tel" id="newLandlordPhone" required placeholder="10-digit mobile number" pattern="[0-9]{10}" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Amenities Available</label>
+            <div class="checkbox-grid">
+              <label><input type="checkbox" name="amenity" value="24x7 Water" checked /> 24x7 Water</label>
+              <label><input type="checkbox" name="amenity" value="WiFi" checked /> High Speed WiFi</label>
+              <label><input type="checkbox" name="amenity" value="Power Backup" checked /> Power Backup</label>
+              <label><input type="checkbox" name="amenity" value="Bike Parking" checked /> Bike Parking</label>
+              <label><input type="checkbox" name="amenity" value="Geyser" /> Geyser / Hot Water</label>
+              <label><input type="checkbox" name="amenity" value="CCTV Security" /> CCTV Security</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="newDescription" rows="2" placeholder="Tell students about the room, distance from colleges, bus stands, and sweet water facility..."></textarea>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" onclick="closeModal('addPropertyModal')">Cancel</button>
+            <button type="submit" class="btn-primary"><i class="fa-solid fa-cloud-arrow-up"></i> Publish Listing</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Direct Chat Modal -->
+  <div class="modal-overlay" id="chatModal" style="display: none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-comments"></i> Direct Chat with Owner</h3>
+        <button class="modal-close" onclick="closeModal('chatModal')">&times;</button>
+      </div>
+      <div class="modal-body chat-modal-body">
+        <div class="chat-owner-info" id="chatOwnerInfo">
+          <div class="avatar"><i class="fa-solid fa-user-tie"></i></div>
+          <div>
+            <strong id="chatOwnerName">Anil Deshmukh (Landlord)</strong>
+            <span id="chatPropertyTitle">Spacious 2BHK Flat near KITS</span>
+          </div>
+        </div>
+        <div class="chat-thread" id="chatThread">
+          <!-- Chat messages dynamically rendered -->
+        </div>
+        <form class="chat-input-bar" onsubmit="handleSendChat(event)">
+          <input type="text" id="chatInput" placeholder="Ask about availability, water, electricity..." required />
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-paper-plane"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Saved / Favorites Modal -->
+  <div class="modal-overlay" id="favModal" style="display: none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-heart text-danger"></i> Saved Rooms (<span id="favModalCount">0</span>)</h3>
+        <button class="modal-close" onclick="closeModal('favModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="favList" class="fav-list">
+          <!-- Dynamic favorites list -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: Admin Panel Modal -->
+  <div class="modal-overlay" id="adminModal" style="display: none;">
+    <div class="modal-box modal-wide">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-shield-halved"></i> RoomFinder Administrator Console</h3>
+        <button class="modal-close" onclick="closeModal('adminModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="admin-stats-row">
+          <div class="stat-card">
+            <span class="stat-num" id="adminTotalProps">0</span>
+            <span class="stat-label">Total Properties</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num" id="adminTotalVisits">0</span>
+            <span class="stat-label">Visit Bookings</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">100%</span>
+            <span class="stat-label">Zero Brokerage</span>
+          </div>
+        </div>
+
+        <h4 style="margin: 15px 0 10px 0;">Manage Property Listings</h4>
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>City</th>
+                <th>Rent</th>
+                <th>Owner</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminTableBody">
+              <!-- Admin rows injected -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 8. TOAST NOTIFICATIONS (Non-intrusive feedbacks)                           -->
+  <!-- ========================================================================= -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ========================================================================= -->
+  <!-- 9. FOOTER                                                                 -->
+  <!-- ========================================================================= -->
+  <footer class="main-footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <div class="footer-brand">
+          <div class="brand-icon"><i class="fa-solid fa-building"></i></div>
+          <span>RoomFinder Maharashtra</span>
+        </div>
+        <p class="footer-text">
+          A dedicated zero-brokerage housing portal designed for students and bachelor working professionals 
+          migrating to university campuses and major towns across Maharashtra.
+        </p>
+        <div class="student-credit">
+          <i class="fa-solid fa-code"></i> University Final Year Capstone Project
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Key Maharashtra Hubs</h4>
+        <ul>
+          <li><a href="#properties-section" onclick="filterByCity('Ramtek, Dist. Nagpur')">Ramtek (Near KITS College)</a></li>
+          <li><a href="#properties-section" onclick="filterByCity('Nagpur')">Nagpur (Sitabuldi, Dharampeth)</a></li>
+          <li><a href="#properties-section" onclick="filterByCity('Pune')">Pune (Kothrud, Hinjewadi)</a></li>
+          <li><a href="#properties-section" onclick="filterByCity('Mumbai')">Mumbai & Suburban</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Student Guarantee</h4>
+        <ul>
+          <li><i class="fa-solid fa-check text-green"></i> 100% Zero Brokerage</li>
+          <li><i class="fa-solid fa-check text-green"></i> Max Rent Capped at ₹10,000</li>
+          <li><i class="fa-solid fa-check text-green"></i> Direct Landlord Mobile Numbers</li>
+          <li><i class="fa-solid fa-check text-green"></i> Free Physical Visits</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2025 - 2026 RoomFinder Maharashtra. Designed & Developed by Abhirathod.</span>
+      <a href="roomfinder_vanilla_html_css_js.zip" download="roomfinder_vanilla_html_css_js.zip" class="footer-download-link">
+        <i class="fa-solid fa-file-zipper"></i> Download Project Files (.ZIP)
+      </a>
+    </div>
+  </footer>
+
+  <!-- Main JavaScript File -->
+  <script src="script.js"></script>
+</body>
+</html>
